@@ -1,0 +1,11 @@
+body {
+    margin: 40px auto;
+    max-width: 650px;
+    line-height: 1.6;
+    font-size: 18px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color: #0c2317;
+    padding: 0 10px;
+    text-align: justify;
+    background-color: #fdf9ef;
+}
