@@ -1,7 +1,7 @@
 // set the dimensions and margins of the graph
 const margin = {top: 10, right: 30, bottom: 30, left: 40},
-  width = 400 - margin.left - margin.right,
-  height = 400 - margin.top - margin.bottom;
+  width = 500 - margin.left - margin.right,
+  height = 500 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
 const svg = d3.select("#graph")
@@ -43,7 +43,7 @@ fetchJson().then((data) => {
             .selectAll("circle")
             .data(data.nodes)
             .join("circle")
-            .attr("r", 7)
+            .attr("r", 10)
             .style("fill", d => color(d.type));
 
         // Let's list the force we wanna apply on the network
@@ -52,8 +52,8 @@ fetchJson().then((data) => {
                 .id(function (d) { return d.id; }) // This provide  the id of a node
                 .links(data.links) // and this the list of links
             )
-            .force("charge", d3.forceManyBody().strength(-100)) // This adds repulsion between nodes. Play with the -400 for the repulsion strength
-            .force("center", d3.forceCenter(width / 2, height / 2)) // This force attracts nodes to the center of the svg area
+            .force("charge", d3.forceManyBody().strength(-100)) // Adds repulsion between nodes.
+            .force("center", d3.forceCenter(3 * width / 4, height / 2)) // This force attracts nodes slightly to the right to avoid the legend
             .on("end", ticked);
 
         // This function is run at each iteration of the force algorithm, updating the nodes position.
@@ -68,5 +68,16 @@ fetchJson().then((data) => {
                 .attr("cx", function (d) { return d.x + 6; })
                 .attr("cy", function (d) { return d.y - 6; });
         }
+
+        // Make legend
+        svg.append("g")
+          .attr("class", "legendOrdinal")
+          .attr("transform", `translate(0,20)`);
+
+        var legendOrdinal = d3.legendColor()
+          .scale(color);
+
+        svg.select(".legendOrdinal")
+          .call(legendOrdinal);
 
     });
