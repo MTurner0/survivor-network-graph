@@ -44,9 +44,10 @@ fetchJson().then((data) => {
             .data(data.nodes)
             .join("circle")
             .attr("r", 10)
-            .style("fill", d => color(d.type));
+            .style("fill", d => color(d.type))
+            .style("opacity", 0.5);
 
-        // Let's list the force we wanna apply on the network
+        // Let's list the force we want to apply on the network
         const simulation = d3.forceSimulation(data.nodes) // Force algorithm is applied to data.nodes
             .force("link", d3.forceLink() // This force provides links between nodes
                 .id(function (d) { return d.id; }) // This provide  the id of a node
@@ -65,19 +66,44 @@ fetchJson().then((data) => {
                 .attr("y2", function (d) { return d.target.y; });
 
             node
-                .attr("cx", function (d) { return d.x + 6; })
-                .attr("cy", function (d) { return d.y - 6; });
+                .attr("cx", function (d) { return d.x; })
+                .attr("cy", function (d) { return d.y; });
         }
 
         // Make legend
         svg.append("g")
           .attr("class", "legendOrdinal")
-          .attr("transform", `translate(0,20)`);
+          .attr("transform", `translate(0,20)`)
+          .style("opacity", 0.5);
 
         var legendOrdinal = d3.legendColor()
           .scale(color);
 
         svg.select(".legendOrdinal")
           .call(legendOrdinal);
+
+        // Add brushing
+        const brush = d3.brush()
+            .extent( [ [0, 0], [width, height] ] )
+            .on("start brush", updateChart);
+
+        svg.append("g")
+          .call(brush);
+
+        function updateChart() {
+          extent = d3.brushSelection(this);
+          node.classed("selected", function(d) {
+            return isBrushed(extent, d.x, d.y)
+            }
+          );
+        }
+
+        function isBrushed(brushCoords, cx, cy) {
+          var x0 = brushCoords[0][0],
+              x1 = brushCoords[1][0],
+              y0 = brushCoords[0][1],
+              y1 = brushCoords[1][1];
+         return x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1;    // This return TRUE or FALSE depending on if the points is in the selected area
+        }
 
     });
