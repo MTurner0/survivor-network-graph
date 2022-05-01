@@ -32,7 +32,8 @@ fetchJson().then((data) => {
             .selectAll("line")
             .data(data.links)
             .join("line")
-            .style("stroke", "#aaa");
+            .style("stroke", "#aaa")
+            .attr("stroke-width", d => d.strength); // Link thickness is determined by # of returners
 
         // Color nodes by type of season
         var color = d3
@@ -54,7 +55,7 @@ fetchJson().then((data) => {
                 .links(data.links) // and this the list of links
             )
             .force("charge", d3.forceManyBody().strength(-100)) // Adds repulsion between nodes.
-            .force("center", d3.forceCenter(3 * width / 4, height / 2)) // This force attracts nodes slightly to the right to avoid the legend
+            .force("center", d3.forceCenter(3 * width / 5, height / 2)) // This force attracts nodes slightly to the right to avoid the legend
             .on("end", ticked);
 
         // This function is run at each iteration of the force algorithm, updating the nodes position.
@@ -98,12 +99,13 @@ fetchJson().then((data) => {
           );
         }
 
+        // Determine whether a point is in the selected region
         function isBrushed(brushCoords, cx, cy) {
           var x0 = brushCoords[0][0],
               x1 = brushCoords[1][0],
               y0 = brushCoords[0][1],
               y1 = brushCoords[1][1];
-         return x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1;    // This return TRUE or FALSE depending on if the points is in the selected area
+         return x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1;    // This return TRUE or FALSE depending on if the point is in the selected area
         }
 
     });
