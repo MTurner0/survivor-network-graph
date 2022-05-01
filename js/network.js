@@ -1,5 +1,3 @@
-import { legendColor } from './d3-svg-legend/d3-legend.min.js'
-
 // set the dimensions and margins of the graph
 const margin = {top: 10, right: 30, bottom: 30, left: 40},
   width = 500 - margin.left - margin.right,
