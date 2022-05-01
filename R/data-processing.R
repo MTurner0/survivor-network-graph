@@ -49,8 +49,10 @@ edge_list_builder <- function(season_vector) {
   return(df)
 }
 
+# Count number of returners (edges) between each pair of seasons
 edge_list <- lapply(returner_seasons, FUN = edge_list_builder) %>% 
-  do.call(what = rbind, args = .)
+  do.call(what = rbind, args = .) %>% 
+  group_by(source, target) %>% summarize(strength = n())
 
 # Vector of seasons that have had returners
 node_data <- castaways %>% 
