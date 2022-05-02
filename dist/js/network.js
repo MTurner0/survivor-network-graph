@@ -3,6 +3,9 @@ const margin = {top: 10, right: 30, bottom: 30, left: 40},
   width = 500 - margin.left - margin.right,
   height = 500 - margin.top - margin.bottom;
 
+// will be used to set scale
+const classes = ["All newbies", "All returners", "Captains", "Half and half"];
+
 // append the svg object to the body of the page
 const svg = d3.select("#graph")
 .append("svg")
@@ -37,7 +40,7 @@ fetchJson().then((data) => {
 
         // Color nodes by type of season
         var color = d3
-        .scaleOrdinal(["All newbies", "All returners", "Captains", "Half and half"], d3.schemeCategory10)
+        .scaleOrdinal(classes, d3.schemeCategory10)
 
         // Initialize the nodes
         const node = svg
@@ -46,7 +49,16 @@ fetchJson().then((data) => {
             .join("circle")
             .attr("r", 10)
             .style("fill", d => color(d.type))
-            .style("opacity", 0.5);
+            .style("opacity", 1);
+
+        // Label nodes
+        const label = svg.append("g")
+                    .attr("class", "labels")
+                    .selectAll("text")
+                    .data(data.nodes)
+                    .enter().append("text")
+                    .text(function(d) { return d.season_name; })
+                    .attr("class", "label");
 
         // Let's list the force we want to apply on the network
         const simulation = d3.forceSimulation(data.nodes) // Force algorithm is applied to data.nodes
@@ -54,7 +66,7 @@ fetchJson().then((data) => {
                 .id(function (d) { return d.id; }) // This provide  the id of a node
                 .links(data.links) // and this the list of links
             )
-            .force("charge", d3.forceManyBody().strength(-100)) // Adds repulsion between nodes.
+            .force("charge", d3.forceManyBody().strength(-150)) // Adds repulsion between nodes.
             .force("center", d3.forceCenter(3 * width / 5, height / 2)) // This force attracts nodes slightly to the right to avoid the legend
             .on("end", ticked);
 
@@ -69,23 +81,44 @@ fetchJson().then((data) => {
             node
                 .attr("cx", function (d) { return d.x; })
                 .attr("cy", function (d) { return d.y; });
+
+            label
+                .attr("x", function(d) { return d.x; })
+                .attr("y", function (d) { return d.y; });
         }
 
-        // Make legend
+        // Make legend by hand
+
         svg.append("g")
-          .attr("class", "legendOrdinal")
-          .attr("transform", `translate(0,20)`)
-          .style("opacity", 0.5);
+          .selectAll("legend-dots")
+          .data(classes)
+          .enter()
+          .append("circle")
+            .attr("r", 10)
+            .attr("cx", 0)
+            .attr("cy", function(d,i) {
+              return 25 * i;
+            })
+            .style("fill", function(d) {
+              return color(d);
+            });
 
-        var legendOrdinal = d3.legendColor()
-          .scale(color);
-
-        svg.select(".legendOrdinal")
-          .call(legendOrdinal);
+          svg.append("g")
+            .selectAll("legend-text")
+            .data(classes)
+            .enter()
+            .append("text")
+              .attr("x", 10)
+              .attr("y", function(d,i) {
+                return 5 + (25 * i);
+              })
+              .text(function(d) {
+                return d;
+              });
 
         // Add brushing
         const brush = d3.brush()
-            .extent( [ [0, 0], [width, height] ] )
+            .extent( [ [0, 0], [width + margin.left + margin.right, height + margin.top + margin.bottom] ] )
             .on("start brush", updateChart);
 
         svg.append("g")
@@ -93,10 +126,13 @@ fetchJson().then((data) => {
 
         function updateChart() {
           extent = d3.brushSelection(this);
-          node.classed("selected", function(d) {
+          node.classed("selected-node", function(d) {
             return isBrushed(extent, d.x, d.y)
             }
           );
+          label.classed("selected-label", function(d) {
+            return isBrushed(extent, d.x, d.y)
+          });
         }
 
         // Determine whether a point is in the selected region
