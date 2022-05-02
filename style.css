@@ -10,8 +10,26 @@ body {
     background-color: #fdf9ef;
 }
 
-.selected {
-    opacity: 1 !important;
+.selected-node {
+    opacity: 0.5 !important;
     stroke: black;
     stroke-width: 1px;
   }
+
+.label {
+    opacity: 0;
+    text-anchor: middle;
+    font-size: 15px;
+}
+
+.selected-label {
+    opacity: 1 !important;
+    text-anchor: middle;
+    font-size: 15px;
+}
+
+.legend-text {
+    opacity: 1 !important;
+    text-anchor: end;
+    font-size: 10px;
+}
