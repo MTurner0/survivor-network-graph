@@ -39,7 +39,7 @@ fetchJson().then((data) => {
             .attr("stroke-width", d => d.strength); // Link thickness is determined by # of returners
 
         // Color nodes by type of season
-        var color = d3
+        const color = d3
         .scaleOrdinal(classes, d3.schemeCategory10)
 
         // Initialize the nodes
@@ -137,7 +137,7 @@ fetchJson().then((data) => {
 
         // Determine whether a point is in the selected region
         function isBrushed(brushCoords, cx, cy) {
-          var x0 = brushCoords[0][0],
+          let x0 = brushCoords[0][0],
               x1 = brushCoords[1][0],
               y0 = brushCoords[0][1],
               y1 = brushCoords[1][1];
