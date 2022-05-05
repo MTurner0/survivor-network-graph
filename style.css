@@ -16,6 +16,10 @@ body {
     stroke-width: 1px;
   }
 
+.selected-link {
+    stroke: black;
+}
+
 .label {
     opacity: 0;
     text-anchor: middle;

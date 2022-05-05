@@ -30,16 +30,39 @@ const fetchJson = async () => {
 
 fetchJson().then((data) => {
 
+        // Get list of contestant names
+        const raw_castaways = [];
+
+        for(let i=0; i<data.links.length; i++) {
+          raw_castaways[i] = data.links[i].name;
+        }
+
+        // Remove duplicate names
+        const castaways = [...new Set(raw_castaways)];
+
+        // Initialize menu
+        const dropdown = d3.select("#graph")
+          .append("select");
+
+        dropdown // Add button
+          .selectAll("options")
+            .data(castaways)
+          .enter()
+            .append("option")
+          .text(function (d) { return d; }) // Show text in the menu
+          .attr("value", function (d) { return d; }); // Return value
+
         // Initialize the links
         const link = svg
             .selectAll("line")
             .data(data.links)
             .join("line")
             .style("stroke", "#aaa")
-            .attr("stroke-width", d => d.strength); // Link thickness is determined by # of returners
+            .attr("stroke-width", d => d.strength) // Link thickness is determined by # of returners
+            .attr("id", d => d.name.replace(/ /g, "-") + d.source); // Remove spaces from names
 
         // Color nodes by type of season
-        var color = d3
+        const color = d3
         .scaleOrdinal(classes, d3.schemeCategory10)
 
         // Initialize the nodes
@@ -116,15 +139,50 @@ fetchJson().then((data) => {
                 return d;
               });
 
+        // Add contestant selection
+        dropdown.on("change", function() {
+          // Reset line colors
+          svg.selectAll("line")
+            .style("stroke", "#aaa");
+
+          // Put nodes and text back on top
+          svg.selectAll("circle")
+            .raise();
+
+          svg.selectAll("text")
+            .raise();
+
+          // Recover the chosen contestant
+          let selected = d3.select(this)
+          .property("value");
+
+          console.log(selected); // Print chosen contestant
+
+          // Get all sources
+          let selected_sources = data.links
+            .filter(d => d["name"] == selected)
+            .map(d => selected.replace(/ /g, "-") + d.source.id);
+
+          console.log(selected_sources)
+
+          // Update chart with this option
+          for(let i=0; i<selected_sources.length; i++) {
+            d3.select('#' + selected_sources[i])
+            .style("stroke", "#000")
+            .raise(); // Bring selected path to front
+          }
+
+        })
+
         // Add brushing
         const brush = d3.brush()
             .extent( [ [0, 0], [width + margin.left + margin.right, height + margin.top + margin.bottom] ] )
-            .on("start brush", updateChart);
+            .on("start brush", brushUpdateChart);
 
         svg.append("g")
           .call(brush);
 
-        function updateChart() {
+        function brushUpdateChart() {
           extent = d3.brushSelection(this);
           node.classed("selected-node", function(d) {
             return isBrushed(extent, d.x, d.y)
@@ -137,7 +195,7 @@ fetchJson().then((data) => {
 
         // Determine whether a point is in the selected region
         function isBrushed(brushCoords, cx, cy) {
-          var x0 = brushCoords[0][0],
+          let x0 = brushCoords[0][0],
               x1 = brushCoords[1][0],
               y0 = brushCoords[0][1],
               y1 = brushCoords[1][1];
