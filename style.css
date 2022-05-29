@@ -10,11 +10,15 @@ body {
     background-color: #fdf9ef;
 }
 
+#footers {
+    font-size: 12px;
+}
+
 .selected-node {
     opacity: 0.5 !important;
     stroke: black;
     stroke-width: 1px;
-  }
+}
 
 .selected-link {
     stroke: black;
